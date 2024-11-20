@@ -14,13 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Helper: Move slider to the target card
     const moveToIndex = (index) => {
         const cardWidth = getCardWidth();
-        if (index < 0) {
-            currentIndex = 0; // Prevent overscrolling to the left (first card)
-        } else if (index >= totalCards) {
-            currentIndex = totalCards - 1; // Allow overscrolling only to the last card
-        } else {
-            currentIndex = index;
-        }
+        currentIndex = (index + totalCards) % totalCards; // Loop behavior
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.3s ease";
         prevTranslate = -currentIndex * cardWidth;
@@ -37,14 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dragMove = (clientX) => {
         if (!isDragging) return;
         const diff = clientX - startX;
-        const potentialTranslate = prevTranslate + diff;
-
-        // Prevent dragging past the first card
-        if (potentialTranslate > 0) {
-            sliderWrap.style.transform = `translateX(0px)`;
-        } else {
-            sliderWrap.style.transform = `translateX(${potentialTranslate}px)`;
-        }
+        sliderWrap.style.transform = `translateX(${prevTranslate + diff}px)`;
     };
 
     // Handle drag end (for both touch and pointer)
@@ -55,10 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const cardWidth = getCardWidth();
 
         // Determine swipe direction
-        if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
-            moveToIndex(currentIndex + 1); // Swipe right
-        } else if (diff > cardWidth / 4 && currentIndex > 0) {
-            moveToIndex(currentIndex - 1); // Swipe left
+        if (diff < -cardWidth / 4) {
+            moveToIndex(currentIndex + 1); // Swipe left
+        } else if (diff > cardWidth / 4) {
+            moveToIndex(currentIndex - 1); // Swipe right
         } else {
             moveToIndex(currentIndex); // Snap back to the current card
         }
