@@ -1,68 +1,53 @@
 document.addEventListener("DOMContentLoaded", () => {
     const sliderWrap = document.querySelector(".testimonial_slider_wrap");
     const cards = document.querySelectorAll(".slider_card");
-    const totalCards = cards.length;
     let currentIndex = 0;
     let isDragging = false;
     let startX = 0;
     let currentTranslate = 0;
-    let prevTranslate = 0;
 
-    // Calculate card width based on current breakpoint
-    const getCardWidth = () => cards[0]?.offsetWidth || 0;
-
-    // Move slider wrapper to a specific card
-    const moveToIndex = (index) => {
-        const cardWidth = getCardWidth();
-        if (index < 0) {
-            currentIndex = 0; // Prevent swiping left past the first card
-        } else if (index >= totalCards) {
-            currentIndex = totalCards - 1; // Prevent swiping right past the last card
-        } else {
-            currentIndex = index;
-        }
-        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.3s ease";
-        prevTranslate = -currentIndex * cardWidth;
+    const updateCardWidth = () => {
+        const card = cards[0];
+        return card.offsetWidth;
     };
 
-    // Handle pointer down (dragging starts)
+    const moveToIndex = (index) => {
+        const cardWidth = updateCardWidth();
+        sliderWrap.style.transform = `translateX(${-index * cardWidth}px)`;
+        sliderWrap.style.transition = "transform 0.3s ease";
+        currentIndex = index;
+    };
+
     sliderWrap.addEventListener("pointerdown", (e) => {
         isDragging = true;
-        startX = e.clientX;
-        sliderWrap.style.transition = "none"; // Disable smooth transition during drag
+        startX = e.clientX || e.touches[0].clientX;
+        sliderWrap.style.transition = "none";
     });
 
-    // Handle pointer move (dragging in progress)
     sliderWrap.addEventListener("pointermove", (e) => {
         if (!isDragging) return;
-        const currentX = e.clientX;
+        const currentX = e.clientX || e.touches[0].clientX;
         const diff = currentX - startX;
-        sliderWrap.style.transform = `translateX(${prevTranslate + diff}px)`;
+        sliderWrap.style.transform = `translateX(${currentTranslate + diff}px)`;
     });
 
-    // Handle pointer up (dragging ends)
     sliderWrap.addEventListener("pointerup", (e) => {
-        if (!isDragging) return;
         isDragging = false;
-        const endX = e.clientX;
-        const diff = endX - startX;
-        const cardWidth = getCardWidth();
-
-        if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
-            moveToIndex(currentIndex + 1); // Swipe to the next card
-        } else if (diff > cardWidth / 4 && currentIndex > 0) {
-            moveToIndex(currentIndex - 1); // Swipe to the previous card
+        const endX = e.clientX || e.changedTouches[0].clientX;
+        const cardWidth = updateCardWidth();
+        if (endX - startX < -cardWidth / 2 && currentIndex < cards.length - 1) {
+            moveToIndex(currentIndex + 1);
+        } else if (endX - startX > cardWidth / 2 && currentIndex > 0) {
+            moveToIndex(currentIndex - 1);
         } else {
-            moveToIndex(currentIndex); // Stay on the current card
+            moveToIndex(currentIndex);
         }
+        currentTranslate = -currentIndex * cardWidth;
     });
 
-    // Handle window resize to recalculate positions
     window.addEventListener("resize", () => {
         moveToIndex(currentIndex);
     });
 
-    // Initialize slider at the first card
-    moveToIndex(0);
+    moveToIndex(0); // Initialize slider
 });
