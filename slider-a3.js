@@ -10,26 +10,25 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Helper: Get the visible cards and swipe limits
-    function getVisibleCards() {
+    // Helper: Get the maximum swipe index based on viewport
+    function getMaxIndex() {
         const viewportWidth = window.innerWidth;
 
         if (viewportWidth <= 991) {
-            return { visible: 1.5, maxSwipes: 2 }; // 1.5 cards, max 2 swipes left
+            return Math.min(cards.length - 1, 2); // Max 2 swipes left for 1.5 cards in view
         }
         if (viewportWidth <= 1304) {
-            return { visible: 2.5, maxSwipes: 1 }; // 2.5 cards, max 1 swipe left
+            return Math.min(cards.length - 1, 1); // Max 1 swipe left for 2.5 cards in view
         }
-        return { visible: cards.length, maxSwipes: 0 }; // All cards in view (static)
+        return 0; // No swipes allowed above 1304px
     }
 
-    // Move the slider
+    // Move the slider by the width of one card
     function moveSlider(direction) {
         const cardWidth = getCardWidth();
-        const { visible, maxSwipes } = getVisibleCards();
-        const maxIndex = cards.length - Math.ceil(visible); // Calculate max index based on visible cards
+        const maxIndex = getMaxIndex();
 
-        if (direction === "left" && currentIndex < maxSwipes) {
+        if (direction === "left" && currentIndex < maxIndex) {
             currentIndex++;
         } else if (direction === "right" && currentIndex > 0) {
             currentIndex--;
@@ -64,35 +63,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Initialize slider logic for breakpoints 1304px and below
-    function initializeSlider() {
-        if (window.innerWidth > 1304) {
-            // Disable the slider for larger screens
-            sliderWrap.style.transform = "translateX(0)";
-            sliderWrap.style.transition = "none";
-            currentIndex = 0; // Reset to the initial position
-            return;
-        }
+    // Add touch event listeners to the slider wrapper
+    sliderWrap.addEventListener("touchstart", handleTouchStart);
+    sliderWrap.addEventListener("touchend", handleTouchEnd);
 
-        // Add touch event listeners to the slider wrapper
-        sliderWrap.addEventListener("touchstart", handleTouchStart);
-        sliderWrap.addEventListener("touchend", handleTouchEnd);
-
-        // Adjust slider position on window resize
-        window.addEventListener("resize", function () {
-            if (window.innerWidth > 1304) {
-                // Reset slider for larger screens
-                sliderWrap.style.transform = "translateX(0)";
-                sliderWrap.style.transition = "none";
-                currentIndex = 0;
-            } else {
-                // Recalculate position for smaller screens
-                const cardWidth = getCardWidth();
-                sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            }
-        });
-    }
-
-    // Run the initialization
-    initializeSlider();
+    // Adjust slider on window resize
+    window.addEventListener("resize", function () {
+        const cardWidth = getCardWidth();
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+    });
 });
