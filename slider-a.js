@@ -14,7 +14,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Helper: Move slider to the target card
     const moveToIndex = (index) => {
         const cardWidth = getCardWidth();
-        currentIndex = (index + totalCards) % totalCards; // Loop behavior
+
+        if (index < 0) {
+            currentIndex = 0; // Prevent overscrolling to the left (first card)
+        } else if (index >= totalCards) {
+            currentIndex = totalCards - 1; // Allow swiping to the right edge only
+        } else {
+            currentIndex = index;
+        }
+
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.3s ease";
         prevTranslate = -currentIndex * cardWidth;
@@ -30,22 +38,43 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle dragging (for both touch and pointer)
     const dragMove = (clientX) => {
         if (!isDragging) return;
+
         const diff = clientX - startX;
-        sliderWrap.style.transform = `translateX(${prevTranslate + diff}px)`;
+        const potentialTranslate = prevTranslate + diff;
+
+        // Allow movement, but clamp to the left edge on the first card
+        if (currentIndex === 0 && potentialTranslate > 0) {
+            sliderWrap.style.transform = `translateX(0px)`; // Lock at the first card
+        } else if (currentIndex === totalCards - 1 && potentialTranslate < -prevTranslate) {
+            sliderWrap.style.transform = `translateX(${-prevTranslate}px)`; // Lock at the last card's position
+        } else {
+            sliderWrap.style.transform = `translateX(${potentialTranslate}px)`;
+        }
     };
 
     // Handle drag end (for both touch and pointer)
     const endDrag = (clientX) => {
         if (!isDragging) return;
         isDragging = false;
+
         const diff = clientX - startX;
         const cardWidth = getCardWidth();
 
-        // Determine swipe direction
-        if (diff < -cardWidth / 4) {
-            moveToIndex(currentIndex + 1); // Swipe left
-        } else if (diff > cardWidth / 4) {
-            moveToIndex(currentIndex - 1); // Swipe right
+        // Logic for last card
+        if (currentIndex === totalCards - 1) {
+            if (diff < -cardWidth / 4) {
+                moveToIndex(0); // Swipe right: loop back to the first card
+            } else {
+                moveToIndex(currentIndex); // Stay on the last card
+            }
+            return;
+        }
+
+        // Logic for other cards
+        if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
+            moveToIndex(currentIndex + 1); // Swipe left: move to the next card
+        } else if (diff > cardWidth / 4 && currentIndex > 0) {
+            moveToIndex(currentIndex - 1); // Swipe right: move to the previous card
         } else {
             moveToIndex(currentIndex); // Snap back to the current card
         }
