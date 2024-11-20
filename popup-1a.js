@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Show the overlay and card with fade-in animations
         gsap.set(overlay, { display: "flex" }); // Make overlay visible
-        gsap.to(overlay, { opacity: 1, duration: 0.5, ease: "power2.out" }); // Fade in overlay
+        gsap.to(overlay, { opacity: 1, duration: 0.3, ease: "power2.out" }); // Fade in overlay
         gsap.set(card, { display: "block" }); // Make the specific card visible
         gsap.fromTo(
             card,
