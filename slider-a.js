@@ -2,74 +2,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const sliderWrap = document.querySelector(".testimonial_slider_wrap");
     const cards = document.querySelectorAll(".slider_card");
     const totalCards = cards.length;
-    let currentIndex = 0;
+    let currentIndex = 0; // Track the current card
+    let startX = 0; // Track the start position of the drag
     let isDragging = false;
-    let startX = 0;
-    let currentTranslate = 0;
-    let prevTranslate = 0;
 
-    // Helper: Calculate card width dynamically
+    // Helper: Get the card width dynamically
     const getCardWidth = () => cards[0]?.offsetWidth || 0;
 
-    // Helper: Move slider to the target card
-    const moveToIndex = (index) => {
+    // Helper: Move the slider to the correct position
+    const moveSlider = (index) => {
         const cardWidth = getCardWidth();
-        currentIndex = Math.max(0, Math.min(index, totalCards - 1)); // Clamp index within range
-        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+        sliderWrap.style.transform = `translateX(${-index * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.3s ease";
-        prevTranslate = -currentIndex * cardWidth;
+        currentIndex = index; // Update the current index
     };
 
-    // Handle drag start (for both touch and pointer)
+    // Enable slider only for breakpoints <= 1304px
+    const isBreakpointActive = () => window.innerWidth <= 1304;
+
+    // Start dragging
     const startDrag = (clientX) => {
+        if (!isBreakpointActive()) return; // Do nothing if above breakpoint
         isDragging = true;
         startX = clientX;
         sliderWrap.style.transition = "none"; // Disable smooth transition while dragging
     };
 
-    // Handle dragging (for both touch and pointer)
+    // Handle dragging
     const dragMove = (clientX) => {
         if (!isDragging) return;
-
         const diff = clientX - startX;
-        const potentialTranslate = prevTranslate + diff;
 
-        // Allow dragging, but restrict movement at boundaries
-        if (currentIndex === 0 && potentialTranslate > 0) {
-            sliderWrap.style.transform = `translateX(0px)`; // Lock at first card
-        } else if (currentIndex === totalCards - 1 && potentialTranslate < -prevTranslate) {
-            sliderWrap.style.transform = `translateX(${-prevTranslate}px)`; // Lock at last card
-        } else {
-            sliderWrap.style.transform = `translateX(${potentialTranslate}px)`;
-        }
+        // Visual feedback during drag
+        sliderWrap.style.transform = `translateX(calc(${-currentIndex * 100}% + ${diff}px))`;
     };
 
-    // Handle drag end (for both touch and pointer)
+    // End dragging
     const endDrag = (clientX) => {
-        if (!isDragging) return;
+        if (!isDragging || !isBreakpointActive()) return;
         isDragging = false;
 
-        const diff = clientX - startX; // Distance swiped
+        const diff = clientX - startX;
         const cardWidth = getCardWidth();
 
-        if (Math.abs(diff) > cardWidth / 4) {
-            if (diff < 0 && currentIndex < totalCards - 1) {
-                // Swipe left
-                moveToIndex(currentIndex + 1);
-            } else if (diff > 0 && currentIndex > 0) {
-                // Swipe right
-                moveToIndex(currentIndex - 1);
-            } else {
-                // Snap back to current card
-                moveToIndex(currentIndex);
-            }
+        // Determine swipe direction and move slider
+        if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
+            // Swipe left
+            moveSlider(currentIndex + 1);
+        } else if (diff > cardWidth / 4 && currentIndex > 0) {
+            // Swipe right
+            moveSlider(currentIndex - 1);
         } else {
-            // Snap back to current card
-            moveToIndex(currentIndex);
+            // Snap back to current position
+            moveSlider(currentIndex);
         }
     };
 
-    // Add event listeners for desktop and mobile
+    // Add event listeners
     sliderWrap.addEventListener("pointerdown", (e) => startDrag(e.clientX));
     sliderWrap.addEventListener("pointermove", (e) => dragMove(e.clientX));
     sliderWrap.addEventListener("pointerup", (e) => endDrag(e.clientX));
@@ -79,11 +68,19 @@ document.addEventListener("DOMContentLoaded", () => {
     sliderWrap.addEventListener("touchmove", (e) => dragMove(e.touches[0].clientX));
     sliderWrap.addEventListener("touchend", (e) => endDrag(e.changedTouches[0].clientX));
 
-    // Update slider on resize
+    // Adjust slider position on window resize
     window.addEventListener("resize", () => {
-        moveToIndex(currentIndex);
+        if (!isBreakpointActive()) {
+            // Reset slider for larger screens
+            sliderWrap.style.transform = "translateX(0)";
+            sliderWrap.style.transition = "none";
+            currentIndex = 0;
+        } else {
+            // Recalculate position
+            moveSlider(currentIndex);
+        }
     });
 
-    // Initialize slider
-    moveToIndex(0);
+    // Initialize the slider at the first card
+    moveSlider(0);
 });
