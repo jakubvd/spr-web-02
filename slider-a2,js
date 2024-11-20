@@ -1,0 +1,67 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const sliderWrap = document.querySelector(".testimonial_slider_wrap");
+    const cards = document.querySelectorAll(".slider_card");
+    let currentIndex = 0; // Track the current visible card
+    let startX = 0; // Store the start position of the swipe
+    let isDragging = false; // Flag to track if the user is swiping
+
+    // Helper: Get the card width dynamically
+    const getCardWidth = () => cards[0]?.offsetWidth || 0;
+
+    // Move the slider by the current card's width
+    const moveSlider = (direction) => {
+        const cardWidth = getCardWidth();
+
+        // Update current index based on direction
+        if (direction === "left" && currentIndex < cards.length - 1) {
+            currentIndex++;
+        } else if (direction === "right" && currentIndex > 0) {
+            currentIndex--;
+        }
+
+        // Move the slider
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+        sliderWrap.style.transition = "transform 0.3s ease";
+    };
+
+    // Handle touch start
+    const handleTouchStart = (e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX; // Record the starting X position
+        sliderWrap.style.transition = "none"; // Disable transition while dragging
+    };
+
+    // Handle touch move (optional for visual feedback)
+    const handleTouchMove = (e) => {
+        if (!isDragging) return;
+        // Dragging logic can be added here for feedback during swipe
+    };
+
+    // Handle touch end
+    const handleTouchEnd = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const endX = e.changedTouches[0].clientX; // Get the end X position
+        const diff = endX - startX; // Calculate the swipe distance
+
+        if (diff < -50) {
+            // Swipe left
+            moveSlider("left");
+        } else if (diff > 50) {
+            // Swipe right
+            moveSlider("right");
+        }
+    };
+
+    // Add touch event listeners
+    sliderWrap.addEventListener("touchstart", handleTouchStart);
+    sliderWrap.addEventListener("touchmove", handleTouchMove);
+    sliderWrap.addEventListener("touchend", handleTouchEnd);
+
+    // Ensure proper positioning on resize
+    window.addEventListener("resize", () => {
+        const cardWidth = getCardWidth();
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+    });
+});
