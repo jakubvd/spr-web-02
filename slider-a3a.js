@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (viewportWidth <= 991) {
             return Math.min(cards.length - 1, 2); // Max 2 swipes left for 1.5 cards in view
         }
-        if (viewportWidth <= 1304) {
+        if (viewportWidth <= 1349) {
             return Math.min(cards.length - 1, 1); // Max 1 swipe left for 2.5 cards in view
         }
         return 0; // No swipes allowed above 1304px
@@ -95,9 +95,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleResize() {
         const viewportWidth = window.innerWidth;
 
-        if (viewportWidth <= 1304 && !isActive) {
+        if (viewportWidth <= 1349 && !isActive) {
             activateSlider();
-        } else if (viewportWidth > 1304 && isActive) {
+        } else if (viewportWidth > 1349 && isActive) {
             deactivateSlider();
         }
     }
