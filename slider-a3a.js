@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let startX = 0; // Store the start position of the swipe/drag
     let isDragging = false; // Track if the user is swiping or dragging
     let cardWidth = 0; // Store the width of one card
+    let currentTranslate = 0; // Current translateX value
+    let prevTranslate = 0; // Previous translateX value
     let isActive = false; // Track whether the slider is active
 
     // Helper: Get the width of the card dynamically
@@ -25,6 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return 0; // No swipes allowed above 1304px
     }
 
+    // Clamp value to ensure it stays within min and max boundaries
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
     // Move the slider by the width of one card
     function moveSlider(direction) {
         const maxIndex = getMaxIndex();
@@ -38,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.4s ease"; // Smooth movement
+        prevTranslate = -currentIndex * cardWidth;
     }
 
     // Start drag or touch event
@@ -54,7 +62,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const currentX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
         const diff = currentX - startX;
 
-        sliderWrap.style.transform = `translateX(${diff + -currentIndex * cardWidth}px)`; // Translate dynamically as the user drags
+        // Calculate the new translation and clamp it to prevent overscrolling
+        const maxTranslate = -(getMaxIndex() * cardWidth);
+        const minTranslate = 0;
+        currentTranslate = clamp(prevTranslate + diff, maxTranslate, minTranslate);
+
+        sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
 
     // End drag or touch event
@@ -83,10 +96,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const viewportWidth = window.innerWidth;
 
         if (viewportWidth <= 1304 && !isActive) {
-            // Activate slider
             activateSlider();
         } else if (viewportWidth > 1304 && isActive) {
-            // Deactivate slider
             deactivateSlider();
         }
     }
