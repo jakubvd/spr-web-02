@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const sliderWrap = document.querySelector(".testimonial_slider_wrap");
-    const cards = document.querySelectorAll(".slider_card");
-    let currentIndex = 0; // Track the current visible card
+    const sliderWrap = document.querySelector(".slider_home_wrap");
+    const cards = document.querySelectorAll(".slider_home_card");
+    let currentIndex = 0; // Track the current visible card SLIDER HOME 
     let startX = 0; // Store the start position of the swipe
     let isDragging = false; // Track if the user is swiping
 
