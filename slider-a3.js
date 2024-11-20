@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.4s easeOut"; // Smooth movement
+        sliderWrap.style.transition = "transform 0.4s ease"; // Smooth movement
     }
 
     // Start touch event
