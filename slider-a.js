@@ -14,15 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Helper: Move slider to the target card
     const moveToIndex = (index) => {
         const cardWidth = getCardWidth();
-
-        if (index < 0) {
-            currentIndex = 0; // Prevent overscrolling to the left (first card)
-        } else if (index >= totalCards) {
-            currentIndex = totalCards - 1; // Allow swiping to the right edge only
-        } else {
-            currentIndex = index;
-        }
-
+        currentIndex = Math.max(0, Math.min(index, totalCards - 1)); // Clamp index within range
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.3s ease";
         prevTranslate = -currentIndex * cardWidth;
@@ -42,11 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const diff = clientX - startX;
         const potentialTranslate = prevTranslate + diff;
 
-        // Allow movement, but clamp to the left edge on the first card
+        // Allow dragging, but restrict movement at boundaries
         if (currentIndex === 0 && potentialTranslate > 0) {
-            sliderWrap.style.transform = `translateX(0px)`; // Lock at the first card
+            sliderWrap.style.transform = `translateX(0px)`; // Lock at first card
         } else if (currentIndex === totalCards - 1 && potentialTranslate < -prevTranslate) {
-            sliderWrap.style.transform = `translateX(${-prevTranslate}px)`; // Lock at the last card's position
+            sliderWrap.style.transform = `translateX(${-prevTranslate}px)`; // Lock at last card
         } else {
             sliderWrap.style.transform = `translateX(${potentialTranslate}px)`;
         }
@@ -57,26 +49,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isDragging) return;
         isDragging = false;
 
-        const diff = clientX - startX;
+        const diff = clientX - startX; // Distance swiped
         const cardWidth = getCardWidth();
 
-        // Logic for last card
-        if (currentIndex === totalCards - 1) {
-            if (diff < -cardWidth / 4) {
-                moveToIndex(0); // Swipe right: loop back to the first card
+        if (Math.abs(diff) > cardWidth / 4) {
+            if (diff < 0 && currentIndex < totalCards - 1) {
+                // Swipe left
+                moveToIndex(currentIndex + 1);
+            } else if (diff > 0 && currentIndex > 0) {
+                // Swipe right
+                moveToIndex(currentIndex - 1);
             } else {
-                moveToIndex(currentIndex); // Stay on the last card
+                // Snap back to current card
+                moveToIndex(currentIndex);
             }
-            return;
-        }
-
-        // Logic for other cards
-        if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
-            moveToIndex(currentIndex + 1); // Swipe left: move to the next card
-        } else if (diff > cardWidth / 4 && currentIndex > 0) {
-            moveToIndex(currentIndex - 1); // Swipe right: move to the previous card
         } else {
-            moveToIndex(currentIndex); // Snap back to the current card
+            // Snap back to current card
+            moveToIndex(currentIndex);
         }
     };
 
