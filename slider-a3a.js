@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.4s ease"; // Smooth movement
+        sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // Snap back to the current position
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            sliderWrap.style.transition = "transform 0.4s ease";
+            sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
     }
 
