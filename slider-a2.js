@@ -1,49 +1,44 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".testimonial_slider_wrap");
     const cards = document.querySelectorAll(".slider_card");
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe
-    let isDragging = false; // Flag to track if the user is swiping
+    let isDragging = false; // Track if the user is swiping
 
-    // Helper: Get the card width dynamically
-    const getCardWidth = () => cards[0]?.offsetWidth || 0;
+    // Helper: Get the width of the card dynamically
+    function getCardWidth() {
+        return cards[0] ? cards[0].offsetWidth : 0;
+    }
 
-    // Move the slider by the current card's width
-    const moveSlider = (direction) => {
+    // Move the slider by the width of one card
+    function moveSlider(direction) {
         const cardWidth = getCardWidth();
 
-        // Update current index based on direction
         if (direction === "left" && currentIndex < cards.length - 1) {
             currentIndex++;
         } else if (direction === "right" && currentIndex > 0) {
             currentIndex--;
         }
 
-        // Move the slider
+        // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.3s ease";
-    };
+        sliderWrap.style.transition = "transform 0.3s ease"; // Smooth movement
+    }
 
-    // Handle touch start
-    const handleTouchStart = (e) => {
+    // Start touch event
+    function handleTouchStart(e) {
         isDragging = true;
         startX = e.touches[0].clientX; // Record the starting X position
-        sliderWrap.style.transition = "none"; // Disable transition while dragging
-    };
+        sliderWrap.style.transition = "none"; // Disable smooth transition while dragging
+    }
 
-    // Handle touch move (optional for visual feedback)
-    const handleTouchMove = (e) => {
-        if (!isDragging) return;
-        // Dragging logic can be added here for feedback during swipe
-    };
-
-    // Handle touch end
-    const handleTouchEnd = (e) => {
+    // End touch event
+    function handleTouchEnd(e) {
         if (!isDragging) return;
         isDragging = false;
 
         const endX = e.changedTouches[0].clientX; // Get the end X position
-        const diff = endX - startX; // Calculate the swipe distance
+        const diff = endX - startX; // Calculate the swipe difference
 
         if (diff < -50) {
             // Swipe left
@@ -52,15 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
             // Swipe right
             moveSlider("right");
         }
-    };
+    }
 
-    // Add touch event listeners
+    // Add touch event listeners to the slider wrapper
     sliderWrap.addEventListener("touchstart", handleTouchStart);
-    sliderWrap.addEventListener("touchmove", handleTouchMove);
     sliderWrap.addEventListener("touchend", handleTouchEnd);
 
-    // Ensure proper positioning on resize
-    window.addEventListener("resize", () => {
+    // Adjust slider on window resize
+    window.addEventListener("resize", function () {
         const cardWidth = getCardWidth();
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
     });
