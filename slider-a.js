@@ -15,9 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const moveToIndex = (index) => {
         const cardWidth = getCardWidth();
         if (index < 0) {
-            currentIndex = 0; // Prevent overscrolling to the left
+            currentIndex = 0; // Prevent overscrolling to the left (first card)
         } else if (index >= totalCards) {
-            currentIndex = totalCards - 1; // Prevent overscrolling to the right
+            currentIndex = totalCards - 1; // Allow overscrolling only to the last card
         } else {
             currentIndex = index;
         }
@@ -37,7 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const dragMove = (clientX) => {
         if (!isDragging) return;
         const diff = clientX - startX;
-        sliderWrap.style.transform = `translateX(${prevTranslate + diff}px)`;
+        const potentialTranslate = prevTranslate + diff;
+
+        // Prevent dragging past the first card
+        if (potentialTranslate > 0) {
+            sliderWrap.style.transform = `translateX(0px)`;
+        } else {
+            sliderWrap.style.transform = `translateX(${potentialTranslate}px)`;
+        }
     };
 
     // Handle drag end (for both touch and pointer)
@@ -49,9 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Determine swipe direction
         if (diff < -cardWidth / 4 && currentIndex < totalCards - 1) {
-            moveToIndex(currentIndex + 1); // Swipe left
+            moveToIndex(currentIndex + 1); // Swipe right
         } else if (diff > cardWidth / 4 && currentIndex > 0) {
-            moveToIndex(currentIndex - 1); // Swipe right
+            moveToIndex(currentIndex - 1); // Swipe left
         } else {
             moveToIndex(currentIndex); // Snap back to the current card
         }
