@@ -1,98 +1,88 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_infinite_wrap");
     const cards = Array.from(document.querySelectorAll(".slider_infinite_card"));
-    const totalCards = cards.length;
+    let currentIndex = 0; // Current visible card index
+    let cardWidth = 0; // Width of one card
+    let visibleCards = 4; // Default number of visible cards
+    let isAnimating = false;
 
-    let cardWidth = 0; // Dynamically calculated width of a single card
-    let isAnimating = false; // Prevent multiple animations
-    let visibleCards = 0; // Number of visible cards based on breakpoints
-    let currentIndex = 0; // Current index of the active card
-
-    // Helper: Set up clones for seamless looping
+    // Helper: Clone cards for infinite looping
     function setupClones() {
-        // Clone first and last few cards
-        const cloneStart = cards.slice(0, visibleCards);
-        const cloneEnd = cards.slice(-visibleCards);
+        const cloneStart = cards.slice(0, visibleCards).map(card => card.cloneNode(true));
+        const cloneEnd = cards.slice(-visibleCards).map(card => card.cloneNode(true));
 
         // Append clones to the slider
-        cloneStart.forEach(card => sliderWrap.appendChild(card.cloneNode(true)));
-        cloneEnd.forEach(card => sliderWrap.insertBefore(card.cloneNode(true), sliderWrap.firstChild));
+        cloneStart.forEach(clone => sliderWrap.appendChild(clone));
+        cloneEnd.forEach(clone => sliderWrap.insertBefore(clone, sliderWrap.firstChild));
     }
 
-    // Helper: Update card width and visible cards based on viewport width
+    // Helper: Update card dimensions based on viewport
     function calculateCardDimensions() {
-        if (cards[0]) {
-            cardWidth = cards[0].offsetWidth;
-        }
+        cardWidth = cards[0]?.offsetWidth || 0;
 
         const viewportWidth = window.innerWidth;
         if (viewportWidth <= 768) {
-            visibleCards = 1; // Mobile: 1 card visible
+            visibleCards = 1; // 1 card visible on mobile
         } else if (viewportWidth <= 991) {
-            visibleCards = 2; // Tablet: 2 cards visible
+            visibleCards = 2; // 2 cards visible on tablet
         } else {
-            visibleCards = 3; // Desktop: 3 cards visible
+            visibleCards = 4; // 4 cards visible on desktop
         }
     }
 
-    // Helper: Move slider to the specified index with animation
+    // Helper: Move slider to a specific index
     function moveToIndex(index, animate = true) {
-        if (isAnimating) return; // Prevent multiple animations
+        if (isAnimating) return;
         isAnimating = true;
 
-        const newTranslateX = -(index * cardWidth);
-
+        const translateX = -(index * cardWidth);
         if (animate) {
-            // Animate with GSAP
             gsap.to(sliderWrap, {
-                x: newTranslateX,
-                duration: 0.4,
+                x: translateX,
+                duration: 0.5,
                 ease: "power1.out",
-                onComplete: () => (isAnimating = false),
+                onComplete: () => {
+                    isAnimating = false;
+                    handleInfiniteLoop();
+                },
             });
         } else {
-            // Jump directly
-            gsap.set(sliderWrap, { x: newTranslateX });
+            gsap.set(sliderWrap, { x: translateX });
             isAnimating = false;
         }
     }
 
-    // Helper: Handle infinite looping logic
+    // Helper: Infinite loop handling
     function handleInfiniteLoop() {
-        // If swiping beyond the last card
+        const totalCards = cards.length;
         if (currentIndex >= totalCards) {
             currentIndex = 0; // Reset to the first original card
-            moveToIndex(currentIndex, false); // Jump without animation
-        }
-
-        // If swiping before the first card
-        if (currentIndex < 0) {
+            moveToIndex(currentIndex, false);
+        } else if (currentIndex < 0) {
             currentIndex = totalCards - 1; // Reset to the last original card
-            moveToIndex(currentIndex, false); // Jump without animation
+            moveToIndex(currentIndex, false);
         }
     }
 
-    // Swipe Left (next card)
+    // Swipe left (next card)
     function swipeLeft() {
         currentIndex++;
         moveToIndex(currentIndex);
-        setTimeout(handleInfiniteLoop, 450); // Check loop after animation
     }
 
-    // Swipe Right (previous card)
+    // Swipe right (previous card)
     function swipeRight() {
         currentIndex--;
         moveToIndex(currentIndex);
-        setTimeout(handleInfiniteLoop, 450); // Check loop after animation
     }
 
-    // Touch and drag events
+    // Event listeners for drag/swipe
     let startX = 0;
     let isDragging = false;
 
     function handleStart(e) {
-        startX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
         isDragging = true;
+        startX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
     }
 
     function handleMove(e) {
@@ -103,10 +93,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (diff > 50) {
             isDragging = false;
-            swipeRight(); // Swipe Right
+            swipeRight();
         } else if (diff < -50) {
             isDragging = false;
-            swipeLeft(); // Swipe Left
+            swipeLeft();
         }
     }
 
@@ -114,16 +104,16 @@ document.addEventListener("DOMContentLoaded", function () {
         isDragging = false;
     }
 
-    // Initialize slider
+    // Initialize the slider
     function initSlider() {
         calculateCardDimensions();
         setupClones();
 
-        // Set initial position
+        // Set initial position to show the first visible card
         currentIndex = visibleCards;
-        moveToIndex(currentIndex, false); // Jump to the first visible card
+        moveToIndex(currentIndex, false);
 
-        // Event listeners
+        // Event listeners for swipe
         sliderWrap.addEventListener("mousedown", handleStart);
         sliderWrap.addEventListener("mousemove", handleMove);
         sliderWrap.addEventListener("mouseup", handleEnd);
@@ -133,13 +123,12 @@ document.addEventListener("DOMContentLoaded", function () {
         sliderWrap.addEventListener("touchmove", handleMove);
         sliderWrap.addEventListener("touchend", handleEnd);
 
-        // Adjust on resize
+        // Update dimensions on resize
         window.addEventListener("resize", () => {
             calculateCardDimensions();
             moveToIndex(currentIndex, false);
         });
     }
 
-    // Run the initialization
-    initSlider();
+    initSlider(); // Run initialization
 });
