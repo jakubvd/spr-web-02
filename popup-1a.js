@@ -19,8 +19,8 @@ document.addEventListener("DOMContentLoaded", function () {
         gsap.set(card, { display: "block" }); // Make the specific card visible
         gsap.fromTo(
             card,
-            { opacity: 0, scale: 0.75 },
-            { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }
         );
     }
 
