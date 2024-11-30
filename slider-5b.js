@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Use GSAP for smooth animation
         gsap.to(sliderWrap, {
             x: newTranslate,
-            duration: 0.4, // Slightly slower for a smooth feel
+            duration: 0.4, // Smooth animation duration
             ease: "power1.out",
         });
 
