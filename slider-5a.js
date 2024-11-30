@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let startY = 0; // Store the start position of the swipe/drag (Y-axis)
     let isDragging = false; // Track if the user is swiping or dragging
+    let isClicking = true; // Track whether the interaction is a click
     let cardWidth = 0; // Store the width of one card
     let currentTranslate = 0; // Current translateX value
     let prevTranslate = 0; // Previous translateX value
@@ -46,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Apply the translation using GSAP
         gsap.to(sliderWrap, {
             x: newTranslate,
-            duration: 0.25, // Match premium feel with 0.25s duration
+            duration: 0.25,
             ease: "power1.out",
         });
 
@@ -56,19 +57,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start drag or touch event
     const handleStart = (e) => {
         isDragging = true;
+        isClicking = true; // Assume it's a click until proven otherwise
         const touch = e.type.includes("mouse") ? e : e.touches[0];
-        startX = touch.clientX; // Store the starting X position
-        startY = touch.clientY; // Store the starting Y position
-        gsap.set(sliderWrap, { clearProps: "all" }); // Remove any transition to make dragging responsive
+        startX = touch.clientX;
+        startY = touch.clientY;
+        gsap.set(sliderWrap, { clearProps: "all" }); // Remove transitions during dragging
     };
 
     // Move during drag or touch
     const handleMove = (e) => {
         if (!isDragging) return;
 
+        isClicking = false; // Mark interaction as a drag/swipe
         const touch = e.type.includes("mouse") ? e : e.touches[0];
-        const diffX = touch.clientX - startX; // Horizontal movement
-        const diffY = touch.clientY - startY; // Vertical movement
+        const diffX = touch.clientX - startX;
+        const diffY = touch.clientY - startY;
 
         // Cancel if vertical movement is greater than horizontal
         if (Math.abs(diffY) > Math.abs(diffX)) {
@@ -90,8 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isDragging) return;
         isDragging = false;
 
+        // Exit if it's a click/tap, do nothing
+        if (isClicking) return;
+
         const touch = e.type.includes("mouse") ? e : e.changedTouches[0];
-        const diff = touch.clientX - startX; // Calculate the swipe/drag distance
+        const diff = touch.clientX - startX;
 
         if (diff < -swipeThreshold) {
             // Swipe left
@@ -116,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Recalculate cardWidth and update slider position on resize
         cardWidth = getCardWidth();
         const maxIndex = getMaxIndex();
-        currentIndex = clamp(currentIndex, 0, maxIndex); // Clamp currentIndex to new maxIndex
-        prevTranslate = -currentIndex * cardWidth; // Update previous translation
+        currentIndex = clamp(currentIndex, 0, maxIndex);
+        prevTranslate = -currentIndex * cardWidth;
         gsap.set(sliderWrap, { x: prevTranslate }); // Adjust slider position
 
         // Activate or deactivate slider based on viewport width
@@ -131,26 +137,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // Activate slider
     const activateSlider = () => {
         isActive = true;
-        cardWidth = getCardWidth(); // Recalculate card width
-        gsap.set(sliderWrap, { x: -currentIndex * cardWidth }); // Set initial position
+        cardWidth = getCardWidth();
+        gsap.set(sliderWrap, { x: -currentIndex * cardWidth });
 
-        // Add event listeners for touch and pointer (mouse) events
-        sliderWrap.addEventListener("mousedown", handleStart); // For mouse down
-        sliderWrap.addEventListener("mousemove", handleMove); // For mouse move
-        sliderWrap.addEventListener("mouseup", handleEnd); // For mouse up
-        sliderWrap.addEventListener("mouseleave", handleEnd); // Handle edge case when mouse leaves
+        sliderWrap.addEventListener("mousedown", handleStart);
+        sliderWrap.addEventListener("mousemove", handleMove);
+        sliderWrap.addEventListener("mouseup", handleEnd);
+        sliderWrap.addEventListener("mouseleave", handleEnd);
 
-        sliderWrap.addEventListener("touchstart", handleStart); // For touch start
-        sliderWrap.addEventListener("touchmove", handleMove); // For touch move
-        sliderWrap.addEventListener("touchend", handleEnd); // For touch end
+        sliderWrap.addEventListener("touchstart", handleStart);
+        sliderWrap.addEventListener("touchmove", handleMove);
+        sliderWrap.addEventListener("touchend", handleEnd);
     };
 
     // Deactivate slider
     const deactivateSlider = () => {
         isActive = false;
-        gsap.set(sliderWrap, { x: 0 }); // Reset to default position
+        gsap.set(sliderWrap, { x: 0 });
 
-        // Remove event listeners
         sliderWrap.removeEventListener("mousedown", handleStart);
         sliderWrap.removeEventListener("mousemove", handleMove);
         sliderWrap.removeEventListener("mouseup", handleEnd);
