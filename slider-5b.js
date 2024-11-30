@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return Math.min(Math.max(value, min), max);
     }
 
-    // Move the slider by the width of one card using GSAP
+    // Move the slider by the width of one card
     function moveSlider(direction) {
         const maxIndex = getMaxIndex();
 
@@ -45,17 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
             currentIndex--;
         }
 
-        // Calculate the new translation
-        const newTranslate = -currentIndex * cardWidth;
-
-        // Use GSAP for smooth animation
-        gsap.to(sliderWrap, {
-            x: newTranslate,
-            duration: 0.4, // Smooth animation duration
-            ease: "power1.out",
-        });
-
-        prevTranslate = newTranslate;
+        // Apply the translation
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+        sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
+        prevTranslate = -currentIndex * cardWidth;
     }
 
     // Start drag or touch event
@@ -64,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
         isClicking = true; // Assume it's a click until proven otherwise
         startX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
         startY = e.type.includes("mouse") ? e.clientY : e.touches[0].clientY;
-        gsap.set(sliderWrap, { clearProps: "all" }); // Remove any transition to make dragging responsive
+        sliderWrap.style.transition = "none"; // Disable smooth transition while dragging
     }
 
     // Move during drag or touch
@@ -93,8 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const minTranslate = 0;
         currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
 
-        // Apply the translation dynamically
-        gsap.set(sliderWrap, { x: currentTranslate });
+        sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
 
     // End drag or touch event
@@ -116,11 +108,8 @@ document.addEventListener("DOMContentLoaded", function () {
             moveSlider("right");
         } else {
             // Snap back to the current position
-            gsap.to(sliderWrap, {
-                x: -currentIndex * cardWidth,
-                duration: 0.4, // Smooth snap-back
-                ease: "power1.out",
-            });
+            sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+            sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
     }
 
@@ -133,7 +122,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const maxIndex = getMaxIndex();
         currentIndex = clamp(currentIndex, 0, maxIndex);
         prevTranslate = -currentIndex * cardWidth;
-        gsap.set(sliderWrap, { x: prevTranslate });
+        sliderWrap.style.transform = `translateX(${prevTranslate}px)`;
+        sliderWrap.style.transition = "none";
 
         // Activate or deactivate slider based on viewport width
         if (viewportWidth <= 1349 && !isActive) {
@@ -147,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function activateSlider() {
         isActive = true;
         cardWidth = getCardWidth();
-        gsap.set(sliderWrap, { x: -currentIndex * cardWidth });
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
 
         sliderWrap.addEventListener("mousedown", handleStart);
         sliderWrap.addEventListener("mousemove", handleMove);
@@ -162,7 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Deactivate slider
     function deactivateSlider() {
         isActive = false;
-        gsap.set(sliderWrap, { x: 0 });
+        sliderWrap.style.transform = "translateX(0)";
+        sliderWrap.style.transition = "none";
 
         sliderWrap.removeEventListener("mousedown", handleStart);
         sliderWrap.removeEventListener("mousemove", handleMove);
