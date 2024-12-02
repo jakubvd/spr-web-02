@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
+    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select last card with 'is-last' class
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let startY = 0; // Store the start position of the swipe/drag (Y-axis)
@@ -15,13 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Calculate the maximum translateX value for the slider
-    function getMaxTranslate() {
-        const totalCardsWidth = cards.length * cardWidth; // Total width of all cards
-        const viewportWidth = sliderWrap.offsetWidth; // Visible width of the slider wrap
-        return -(totalCardsWidth - viewportWidth); // Prevent going beyond the last card
-    }
-
     // Clamp value to ensure it stays within min and max boundaries
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
@@ -29,20 +23,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Move the slider by the width of one card
     function moveSlider(direction) {
-        const maxTranslate = getMaxTranslate();
+        const maxIndex = cards.length - 1; // Maximum index is the last card
 
-        if (direction === "left" && currentTranslate > maxTranslate) {
+        if (direction === "left" && currentIndex < maxIndex) {
             currentIndex++;
         } else if (direction === "right" && currentIndex > 0) {
             currentIndex--;
         }
 
-        currentTranslate = -currentIndex * cardWidth;
-        currentTranslate = clamp(currentTranslate, maxTranslate, 0); // Ensure it doesn't overshoot
-
-        sliderWrap.style.transform = `translateX(${currentTranslate}px)`;
+        // Apply the translation
+        sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
         sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
-        prevTranslate = currentTranslate;
+        prevTranslate = -currentIndex * cardWidth;
     }
 
     // Start drag or touch event
@@ -69,9 +61,18 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const maxTranslate = getMaxTranslate();
-        const minTranslate = 0;
+        // Calculate the new translation and clamp it to prevent overscrolling
+        const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
+        const minTranslate = 0; // Minimum right position (first card)
         currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
+
+        // Prevent swiping beyond the last card
+        if (
+            lastCard &&
+            currentTranslate < -(cards.length - 1) * cardWidth
+        ) {
+            currentTranslate = -(cards.length - 1) * cardWidth;
+        }
 
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
@@ -92,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
             moveSlider("right");
         } else {
             // Snap back to the current position
-            sliderWrap.style.transform = `translateX(${currentTranslate}px)`;
+            sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
             sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
     }
