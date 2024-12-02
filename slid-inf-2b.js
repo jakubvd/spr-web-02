@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const sliderWrap = document.querySelector(".slider_testimonial_wrap");
+    const sliderWrap = document.querySelector(".slider_infinite_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
@@ -14,28 +14,33 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Helper: Get the bounding rect of the last card
+    // Helper: Check if the first card is fully in view
+    function isFirstCardFullyVisible() {
+        return currentIndex === 0;
+    }
+
+    // Helper: Check if the last card is fully in view
     function isLastCardFullyVisible() {
         const lastCard = cards[cards.length - 1];
         const sliderRect = sliderWrap.getBoundingClientRect();
         const lastCardRect = lastCard.getBoundingClientRect();
 
-        return lastCardRect.right <= sliderRect.right; // Check if the right edge of the last card is within the slider
+        return lastCardRect.right <= sliderRect.right;
     }
 
     // Move the slider by the width of one card
     function moveSlider(direction) {
         const maxIndex = cards.length - 1;
 
-        if (direction === "left" && currentIndex < maxIndex && !isLastCardFullyVisible()) {
+        if (direction === "left" && !isLastCardFullyVisible()) {
             currentIndex++;
-        } else if (direction === "right" && currentIndex > 0) {
+        } else if (direction === "right" && !isFirstCardFullyVisible()) {
             currentIndex--;
         }
 
         // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
+        sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -74,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // Snap back to the current position
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
+            sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back
         }
     }
 
