@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
-    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select last card
+    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select the last card
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let startY = 0; // Store the start position of the swipe/drag (Y-axis)
@@ -16,30 +16,30 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
+    // Check if the last card is fully in view
+    function isLastCardInView() {
+        const sliderRect = sliderWrap.getBoundingClientRect();
+        const lastCardRect = lastCard.getBoundingClientRect();
+
+        const inView =
+            lastCardRect.left >= sliderRect.left &&
+            lastCardRect.right <= sliderRect.right;
+
+        console.log("Last card in view:", inView); // Log the result
+        console.log("Last card rect:", lastCardRect); // Log last card's position
+        console.log("Slider rect:", sliderRect); // Log slider's position
+
+        return inView;
+    }
+
     // Clamp value to ensure it stays within min and max boundaries
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
 
-    // Check if 'is-last' card is fully in view
-    function isLastCardInView() {
-        const sliderRect = sliderWrap.getBoundingClientRect();
-        const lastCardRect = lastCard.getBoundingClientRect();
-
-        return (
-            lastCardRect.left >= sliderRect.left &&
-            lastCardRect.right <= sliderRect.right
-        );
-    }
-
     // Move the slider by the width of one card
     function moveSlider(direction) {
         const maxIndex = cards.length - 1; // Maximum index is the last card
-
-        // Prevent swiping left if 'is-last' is fully visible
-        if (direction === "left" && currentIndex === maxIndex && isLastCardInView()) {
-            return; // Stop further left swiping for 'is-last'
-        }
 
         if (direction === "left" && currentIndex < maxIndex) {
             currentIndex++;
@@ -81,6 +81,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
         const minTranslate = 0; // Minimum right position (first card)
         currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
+
+        // Prevent swiping beyond the last card if it's fully in view
+        if (isLastCardInView() && currentTranslate < -(cards.length - 1) * cardWidth) {
+            currentTranslate = -(cards.length - 1) * cardWidth;
+        }
 
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
