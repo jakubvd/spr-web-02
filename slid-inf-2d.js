@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
-    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last");
+    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select last card
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
+    let startY = 0; // Store the start position of the swipe/drag (Y-axis)
     let isDragging = false; // Track if the user is swiping or dragging
     let cardWidth = 0; // Store the width of one card
     let currentTranslate = 0; // Current translateX value
@@ -15,26 +16,35 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Check if the last card is fully in view
-    function isLastCardFullyInView() {
-        const wrapRect = sliderWrap.getBoundingClientRect();
+    // Clamp value to ensure it stays within min and max boundaries
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    // Check if 'is-last' card is fully in view
+    function isLastCardInView() {
+        const sliderRect = sliderWrap.getBoundingClientRect();
         const lastCardRect = lastCard.getBoundingClientRect();
-        return lastCardRect.right <= wrapRect.right;
+
+        return (
+            lastCardRect.left >= sliderRect.left &&
+            lastCardRect.right <= sliderRect.right
+        );
     }
 
     // Move the slider by the width of one card
     function moveSlider(direction) {
         const maxIndex = cards.length - 1; // Maximum index is the last card
 
-        if (direction === "left") {
-            if (isLastCardFullyInView()) return; // Prevent swiping left if last card is fully visible
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-            }
-        } else if (direction === "right") {
-            if (currentIndex > 0) {
-                currentIndex--;
-            }
+        // Prevent swiping left if 'is-last' is fully visible
+        if (direction === "left" && currentIndex === maxIndex && isLastCardInView()) {
+            return; // Stop further left swiping for 'is-last'
+        }
+
+        if (direction === "left" && currentIndex < maxIndex) {
+            currentIndex++;
+        } else if (direction === "right" && currentIndex > 0) {
+            currentIndex--;
         }
 
         // Apply the translation
@@ -47,6 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleStart(e) {
         isDragging = true;
         startX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
+        startY = e.type.includes("mouse") ? e.clientY : e.touches[0].clientY;
         sliderWrap.style.transition = "none"; // Disable smooth transition while dragging
     }
 
@@ -55,10 +66,23 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!isDragging) return;
 
         const currentX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
-        const diffX = currentX - startX;
+        const currentY = e.type.includes("mouse") ? e.clientY : e.touches[0].clientY;
 
-        // Allow dynamic dragging without snapping
-        sliderWrap.style.transform = `translateX(${prevTranslate + diffX}px)`;
+        const diffX = currentX - startX; // Horizontal movement
+        const diffY = currentY - startY; // Vertical movement
+
+        // If vertical movement is greater than horizontal, cancel the swipe
+        if (Math.abs(diffY) > Math.abs(diffX)) {
+            isDragging = false;
+            return;
+        }
+
+        // Calculate the new translation and clamp it to prevent overscrolling
+        const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
+        const minTranslate = 0; // Minimum right position (first card)
+        currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
+
+        sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
 
     // End drag or touch event
@@ -67,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         isDragging = false;
 
         const endX = e.type.includes("mouse") ? e.clientX : e.changedTouches[0].clientX;
-        const diff = endX - startX;
+        const diff = endX - startX; // Calculate the swipe/drag distance
 
         if (diff < -swipeThreshold) {
             // Swipe left
@@ -77,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
             moveSlider("right");
         } else {
             // Snap back to the current position
-            sliderWrap.style.transform = `translateX(${prevTranslate}px)`;
+            sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
             sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
     }
