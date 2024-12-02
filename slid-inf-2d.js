@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let isDragging = false; // Track if the user is swiping or dragging
     let cardWidth = 0; // Store the width of one card
+    let currentTranslate = 0; // Current translateX value
     let prevTranslate = 0; // Previous translateX value
     const swipeThreshold = 50; // Minimum swipe distance to trigger a slide
 
@@ -23,18 +24,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Move the slider by the width of one card
     function moveSlider(direction) {
-        const maxIndex = cards.length - 1;
+        const maxIndex = cards.length - 1; // Maximum index is the last card
 
         if (direction === "left") {
-            // Prevent moving further left if the last card is fully in view
-            if (isLastCardFullyInView()) {
-                return;
-            }
+            if (isLastCardFullyInView()) return; // Prevent swiping left if last card is fully visible
             if (currentIndex < maxIndex) {
                 currentIndex++;
             }
         } else if (direction === "right") {
-            // Prevent moving further right if at the first card
             if (currentIndex > 0) {
                 currentIndex--;
             }
@@ -42,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Apply the translation
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.25s ease";
+        sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -50,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function handleStart(e) {
         isDragging = true;
         startX = e.type.includes("mouse") ? e.clientX : e.touches[0].clientX;
-        sliderWrap.style.transition = "none";
+        sliderWrap.style.transition = "none"; // Disable smooth transition while dragging
     }
 
     // Move during drag or touch
@@ -81,38 +78,38 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // Snap back to the current position
             sliderWrap.style.transform = `translateX(${prevTranslate}px)`;
-            sliderWrap.style.transition = "transform 0.25s ease";
+            sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
     }
 
     // Handle window resize to recalculate card width
     function handleResize() {
-        cardWidth = getCardWidth();
-        prevTranslate = -currentIndex * cardWidth;
-        sliderWrap.style.transform = `translateX(${prevTranslate}px)`;
-        sliderWrap.style.transition = "none";
+        cardWidth = getCardWidth(); // Update card width dynamically
+        prevTranslate = -currentIndex * cardWidth; // Adjust current position based on new card width
+        sliderWrap.style.transform = `translateX(${prevTranslate}px)`; // Maintain current position after resize
+        sliderWrap.style.transition = "none"; // Disable transition during resize
     }
 
     // Add event listeners
     function addEventListeners() {
-        sliderWrap.addEventListener("mousedown", handleStart);
-        sliderWrap.addEventListener("mousemove", handleMove);
-        sliderWrap.addEventListener("mouseup", handleEnd);
-        sliderWrap.addEventListener("mouseleave", handleEnd);
+        sliderWrap.addEventListener("mousedown", handleStart); // For mouse down
+        sliderWrap.addEventListener("mousemove", handleMove); // For mouse move
+        sliderWrap.addEventListener("mouseup", handleEnd); // For mouse up
+        sliderWrap.addEventListener("mouseleave", handleEnd); // Handle edge case when mouse leaves
 
-        sliderWrap.addEventListener("touchstart", handleStart);
-        sliderWrap.addEventListener("touchmove", handleMove);
-        sliderWrap.addEventListener("touchend", handleEnd);
+        sliderWrap.addEventListener("touchstart", handleStart); // For touch start
+        sliderWrap.addEventListener("touchmove", handleMove); // For touch move
+        sliderWrap.addEventListener("touchend", handleEnd); // For touch end
 
-        window.addEventListener("resize", handleResize);
+        window.addEventListener("resize", handleResize); // Handle resizing
     }
 
     // Initialize the slider
     function initSlider() {
-        cardWidth = getCardWidth();
-        sliderWrap.style.transform = `translateX(0)`;
-        sliderWrap.style.transition = "none";
-        addEventListeners();
+        cardWidth = getCardWidth(); // Set initial card width
+        sliderWrap.style.transform = `translateX(0)`; // Reset to starting position
+        sliderWrap.style.transition = "none"; // Disable transition initially
+        addEventListeners(); // Add necessary event listeners
     }
 
     // Start the slider
