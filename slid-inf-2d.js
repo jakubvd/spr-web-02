@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
-    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Target the last card
+    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last");
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let startY = 0; // Store the start position of the swipe/drag (Y-axis)
@@ -16,13 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
+    // Clamp value to ensure it stays within min and max boundaries
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
     // Check if the last card is fully in view
     function isLastCardFullyInView() {
-        const sliderWrapRect = sliderWrap.getBoundingClientRect();
+        const wrapRect = sliderWrap.getBoundingClientRect();
         const lastCardRect = lastCard.getBoundingClientRect();
-
-        // Ensure the last card is fully in view
-        return lastCardRect.right <= sliderWrapRect.right && lastCardRect.left >= sliderWrapRect.left;
+        return lastCardRect.right <= wrapRect.right; // Last card is fully in view if its right edge is within wrapper's right edge
     }
 
     // Move the slider by the width of one card
@@ -30,12 +33,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const maxIndex = cards.length - 1; // Maximum index is the last card
 
         if (direction === "left" && currentIndex < maxIndex) {
-            currentIndex++;
-        } else if (direction === "right" && currentIndex > 0) {
-            // Prevent swiping further left when the last card is fully in view
-            if (isLastCardFullyInView() && direction === "right") {
+            if (isLastCardFullyInView()) {
+                // Prevent swiping further left if last card is fully in view
                 return;
             }
+            currentIndex++;
+        } else if (direction === "right" && currentIndex > 0) {
             currentIndex--;
         }
 
@@ -69,10 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Calculate the new translation
+        // Calculate the new translation and clamp it to prevent overscrolling
         const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
         const minTranslate = 0; // Minimum right position (first card)
-        currentTranslate = Math.min(Math.max(prevTranslate + diffX, maxTranslate), minTranslate);
+        currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
 
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
