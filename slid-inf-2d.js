@@ -18,19 +18,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Check if the last card is fully in view
     function isLastCardInView() {
-        const sliderRect = sliderWrap.getBoundingClientRect();
         const lastCardRect = lastCard.getBoundingClientRect();
-
-        const inView =
-            lastCardRect.left >= sliderRect.left &&
-            lastCardRect.right <= sliderRect.right;
-
-        console.log("Last card in view:", inView); // Log the result
-        console.log("Last card rect:", lastCardRect); // Log last card's position
-        console.log("Slider rect:", sliderRect); // Log slider's position
-
-        return inView;
+        const isInView = lastCardRect.left >= 0 && lastCardRect.right <= window.innerWidth;
+    
+        console.log("Last card position (left):", lastCardRect.left);
+        console.log("Last card position (right):", lastCardRect.right);
+        console.log("Window width:", window.innerWidth);
+        console.log("Is last card fully in view?", isInView);
+    
+        return isInView;
     }
+    
 
     // Clamp value to ensure it stays within min and max boundaries
     function clamp(value, min, max) {
