@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function getMaxTranslate() {
         const totalCardsWidth = cards.length * cardWidth; // Total width of all cards
         const viewportWidth = sliderWrap.offsetWidth; // Visible width of the slider wrap
-        return Math.max(0, totalCardsWidth - viewportWidth); // Prevent negative maxTranslate
+        return -(totalCardsWidth - viewportWidth); // Prevent going beyond the last card
     }
 
     // Clamp value to ensure it stays within min and max boundaries
@@ -29,18 +29,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Move the slider by the width of one card
     function moveSlider(direction) {
-        const maxIndex = cards.length - 1; // Maximum index is the last card
         const maxTranslate = getMaxTranslate();
 
-        if (direction === "left" && currentTranslate > -maxTranslate) {
+        if (direction === "left" && currentTranslate > maxTranslate) {
             currentIndex++;
         } else if (direction === "right" && currentIndex > 0) {
             currentIndex--;
         }
 
-        // Apply the translation
         currentTranslate = -currentIndex * cardWidth;
-        currentTranslate = clamp(currentTranslate, -maxTranslate, 0); // Ensure it doesn't overshoot
+        currentTranslate = clamp(currentTranslate, maxTranslate, 0); // Ensure it doesn't overshoot
+
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`;
         sliderWrap.style.transition = "transform 0.25s ease"; // Smooth movement (duration: 0.25s)
         prevTranslate = currentTranslate;
@@ -70,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        const maxTranslate = -getMaxTranslate();
+        const maxTranslate = getMaxTranslate();
         const minTranslate = 0;
         currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
 
