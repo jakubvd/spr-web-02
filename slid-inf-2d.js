@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
-    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select the last card
+    const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last"); // Select last card with 'is-last' class
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
     let startY = 0; // Store the start position of the swipe/drag (Y-axis)
@@ -16,19 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Check if the last card is fully in view
+    // Helper: Check if the last card is fully in view
     function isLastCardInView() {
-        const lastCardRect = lastCard.getBoundingClientRect();
-        const isInView = lastCardRect.left >= 0 && lastCardRect.right <= window.innerWidth;
-    
-        console.log("Last card position (left):", lastCardRect.left);
-        console.log("Last card position (right):", lastCardRect.right);
-        console.log("Window width:", window.innerWidth);
-        console.log("Is last card fully in view?", isInView);
-    
-        return isInView;
+        if (!lastCard) return false;
+        const rect = lastCard.getBoundingClientRect();
+        return rect.left >= 0 && rect.right <= window.innerWidth;
     }
-    
 
     // Clamp value to ensure it stays within min and max boundaries
     function clamp(value, min, max) {
@@ -75,15 +68,15 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        // Prevent swiping beyond the last card
+        if (isLastCardInView() && diffX < 0) {
+            return; // Block further swiping left
+        }
+
         // Calculate the new translation and clamp it to prevent overscrolling
         const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
         const minTranslate = 0; // Minimum right position (first card)
         currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
-
-        // Prevent swiping beyond the last card if it's fully in view
-        if (isLastCardInView() && currentTranslate < -(cards.length - 1) * cardWidth) {
-            currentTranslate = -(cards.length - 1) * cardWidth;
-        }
 
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
@@ -107,6 +100,8 @@ document.addEventListener("DOMContentLoaded", function () {
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
             sliderWrap.style.transition = "transform 0.25s ease"; // Smooth snap-back (duration: 0.25s)
         }
+
+        console.log("Last card fully in view:", isLastCardInView());
     }
 
     // Handle window resize to recalculate card width
