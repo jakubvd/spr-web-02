@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const sliderWrap = document.querySelector(".slider_infinite_wrap");
+    const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
     let currentIndex = 0; // Track the current visible card
     let startX = 0; // Store the start position of the swipe/drag (X-axis)
