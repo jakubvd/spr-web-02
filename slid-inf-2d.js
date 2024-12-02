@@ -16,11 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return cards[0] ? cards[0].offsetWidth : 0;
     }
 
-    // Clamp value to ensure it stays within min and max boundaries
-    function clamp(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
     // Check if the last card is fully in view
     function isLastCardFullyInView() {
         const sliderWrapRect = sliderWrap.getBoundingClientRect();
@@ -34,9 +29,13 @@ document.addEventListener("DOMContentLoaded", function () {
     function moveSlider(direction) {
         const maxIndex = cards.length - 1; // Maximum index is the last card
 
-        if (direction === "left" && currentIndex < maxIndex && !isLastCardFullyInView()) {
+        if (direction === "left" && currentIndex < maxIndex) {
             currentIndex++;
         } else if (direction === "right" && currentIndex > 0) {
+            // Prevent swiping further left when the last card is fully in view
+            if (isLastCardFullyInView() && direction === "right") {
+                return;
+            }
             currentIndex--;
         }
 
@@ -70,10 +69,10 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Calculate the new translation and clamp it to prevent overscrolling
+        // Calculate the new translation
         const maxTranslate = -(cards.length - 1) * cardWidth; // Maximum left position
         const minTranslate = 0; // Minimum right position (first card)
-        currentTranslate = clamp(prevTranslate + diffX, maxTranslate, minTranslate);
+        currentTranslate = Math.min(Math.max(prevTranslate + diffX, maxTranslate), minTranslate);
 
         sliderWrap.style.transform = `translateX(${currentTranslate}px)`; // Translate dynamically as the user drags
     }
