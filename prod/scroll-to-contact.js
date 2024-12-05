@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let offsetY = 92;
         if (isTablet) offsetY = 72;
-        if (isMobile) offsetY = 72;
+        if (isMobile) offsetY = 68;
 
         const duration = isMobile ? 1.2 : 1.0;
 
