@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sliderWrap = document.querySelector(".slider_testimonial_wrap");
     const cards = document.querySelectorAll(".slider_testimonial_card_slot");
     const lastCard = document.querySelector(".slider_testimonial_card_slot.is-last");
-    const swipeThreshold = 30; // Minimum swipe distance to trigger slide
+    const swipeThreshold = 10; // Minimum swipe distance to trigger slide
     let currentIndex = 0;
     let cardWidth = 0;
     let isDragging = false;
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Update slider position
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.3s ease-in-out"; // Smooth movement with sine easing
+        sliderWrap.style.transition = "transform 0.3s ease-in-out"; // Smooth movement with easing
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             // Snap back to the current position
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            sliderWrap.style.transition = "transform 0.3s ease-in-out"; // Smooth snap-back with sine easing
+            sliderWrap.style.transition = "transform 0.3s ease-in-out"; // Smooth snap-back with easing
         }
     }
 
