@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentTranslate = 0;
     let prevTranslate = 0;
     let isActive = false;
-    const swipeThreshold = 10; // Updated swipe threshold to 10 for consistent UX
+    const swipeThreshold = 10;
 
     function getCardWidth() {
         return cards[0] ? cards[0].offsetWidth : 0;
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             currentIndex--;
         }
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.3s ease-out"; // Smooth transition with ease-out
+        sliderWrap.style.transition = "transform 0.3s ease-out";
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             moveSlider("right");
         } else {
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            sliderWrap.style.transition = "transform 0.3s ease-out"; // Smooth snap-back
+            sliderWrap.style.transition = "transform 0.3s ease-out";
         }
     }
 
