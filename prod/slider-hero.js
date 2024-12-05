@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             currentIndex--;
         }
         sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-        sliderWrap.style.transition = "transform 0.3s ease-out";
+        sliderWrap.style.transition = "transform 0.3s ease";
         prevTranslate = -currentIndex * cardWidth;
     }
 
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
             moveSlider("right");
         } else {
             sliderWrap.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
-            sliderWrap.style.transition = "transform 0.3s ease-out";
+            sliderWrap.style.transition = "transform 0.3s ease";
         }
     }
 
