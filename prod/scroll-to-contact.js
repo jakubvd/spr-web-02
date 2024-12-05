@@ -1,23 +1,29 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Register GSAP plugins
+
     gsap.registerPlugin(ScrollToPlugin);
 
-    // Select the trigger and target elements
     const trigger = document.getElementById('contact-scroll-trigger');
     const target = document.getElementById('contact-scroll-to');
 
-    // Function to handle smooth scrolling for desktop
-    function scrollToTargetDesktop() {
+    function scrollToTarget() {
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const isTablet = window.matchMedia('(max-width: 991px)').matches;
+
+        let offsetY = 92;
+        if (isTablet) offsetY = 72;
+        if (isMobile) offsetY = 72;
+
+        const duration = isMobile ? 1.2 : 1.0;
+
         gsap.to(window, {
-            duration: 0.8, // Slower scroll duration for a premium feel
+            duration: duration,
             scrollTo: {
-                y: target, // Scroll to the target element
-                offsetY: '5.5rem' // Account for sticky headers or spacing
+                y: target,
+                offsetY: offsetY
             },
-            ease: 'power2.out' // Smooth easing
+            ease: 'power1.out'
         });
     }
 
-    // Add click event listener to the trigger
-    trigger.addEventListener('click', scrollToTargetDesktop);
+    trigger.addEventListener('click', scrollToTarget);
 });
