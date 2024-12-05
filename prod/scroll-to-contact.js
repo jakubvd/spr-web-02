@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to handle smooth scrolling for desktop
     function scrollToTargetDesktop() {
-        gsap.to(window, {S
+        gsap.to(window, {
             duration: 0.8, // Slower scroll duration for a premium feel
             scrollTo: {
                 y: target, // Scroll to the target element
